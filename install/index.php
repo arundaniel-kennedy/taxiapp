@@ -111,7 +111,7 @@ class Install {
   `paypal_account` enum('sandbox','live') COLLATE utf8_unicode_ci DEFAULT 'sandbox',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2");
-	
+
 	$this->query("INSERT INTO `admin` (`username`, `password`, `api_key`, `google_api_key`, `driver_rate`, `paypal_id`, `paypal_password`, `signature`,`paypal_account`)values('admin',md5('admin'),'" . $this->options['api_key'] . "','" . $this->options['google_api_key'] . "',10,'','','','sandbox')");
 
             $this->query("CREATE TABLE IF NOT EXISTS `keys` (
@@ -145,6 +145,9 @@ $this->query("CREATE TABLE IF NOT EXISTS `payment_history` (
   `payment_mode` varchar(25) NOT NULL,
   `amount` varchar(10) NOT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `goods` text CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+  `scheduled_time` datetime NOT NULL,
+  `image` varchar(100) NULL,
   PRIMARY KEY (`ride_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=latin1;");
 
@@ -164,7 +167,7 @@ $this->query("CREATE TABLE IF NOT EXISTS `payment_history` (
 (6, 'SMTP_PASS', ''),
 (7, 'FROM', '')");
 
-            
+
             $this->query("CREATE TABLE IF NOT EXISTS `users` (
   `user_id` int(10) NOT NULL AUTO_INCREMENT,
   `name` varchar(150) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -198,7 +201,7 @@ $this->query("CREATE TABLE IF NOT EXISTS `payment_history` (
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;");
 
-           
+
         } else
             $this->error = 'Your tables already exist! I won\'t insert anything.';
     }
@@ -219,7 +222,7 @@ $this->query("CREATE TABLE IF NOT EXISTS `payment_history` (
                 echo '<div class="alert alert-warning">' . _('Could not create <code>/classes/config.php</code>, please confirm you have permission to create the file.') . '</div>';
                 return false;
             endif;
-            
+
             if (!$fp_c) :
                 echo '<div class="alert alert-warning">' . _('Could not create <code>/classes/config.php</code>, please confirm you have permission to create the file.') . '</div>';
                 return false;
@@ -232,7 +235,7 @@ $this->query("CREATE TABLE IF NOT EXISTS `payment_history` (
 
 
             fwrite($fp_access, 'RewriteEngine on
-RewriteCond $1 !^(index\.php|public|\.txt) 
+RewriteCond $1 !^(index\.php|public|\.txt)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php?$1');
@@ -458,7 +461,7 @@ $config["proxy_ips"] = "";
                         <input type="text" class="input-xlarge span6" id="base_url" name="api_key" value="<?php if (isset($_POST['api_key'])) echo $_POST['api_key']; ?>" placeholder="Firebase Api Key">
                     </div>
                 </div>
-				
+
 				<div class="control-group">
                     <label class="control-label" for="dbPass"><?php echo ('Google Map Api Key'); ?></label>
                     <div class="controls row-fluid">

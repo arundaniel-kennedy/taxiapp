@@ -11,10 +11,10 @@ class User extends REST_Controller {
      *
      * Maps to the following URL
      * 		http://example.com/index.php/welcome
-     * 	- or -  
+     * 	- or -
      * 		http://example.com/index.php/welcome/index
      * 	- or -
-     * Since this controller is set as the default controller in 
+     * Since this controller is set as the default controller in
      * config/routes.php, it's displayed at http://example.com/
      *
      * So any other public methods not prefixed with an underscore will
@@ -46,7 +46,7 @@ class User extends REST_Controller {
     }
 
     public function change_password_post() {
-         
+
         if (!empty($_POST['old_password']) && !empty($_POST['new_password']) && !empty($_POST['user_id'])) {
             $res = $this->db->get_where("users", array("user_id" => $_POST['user_id'], "password" => md5($_POST['old_password'])))->row();
             if (!empty($res)) {
@@ -183,7 +183,7 @@ class User extends REST_Controller {
                     die;
                 }
             }
-            if (!empty($_POST['passowrd'])) {
+            if (!empty($_POST['password'])) {
                 $_POST['password'] = md5($_POST['password']);
             }
             unset($_POST['X-API-KEY']);
@@ -206,7 +206,7 @@ class User extends REST_Controller {
         $query = $this->db->query("select user_id,name,email,latitude,longitude,vehicle_info,(((acos(sin((" . $_GET['lat'] . "*pi()/180)) *
         sin((`latitude`*pi()/180))+cos((" . $_GET['lat'] . "*pi()/180)) *
         cos((`latitude`*pi()/180)) * cos(((" . $_GET['long'] . "-
-        `longitude`)*pi()/180))))*180/pi())*60*1.1515*1.609344) 
+        `longitude`)*pi()/180))))*180/pi())*60*1.1515*1.609344)
         as distance
 from users where utype=1 and is_online = 1 HAVING distance < $limit order by distance asc");
 
@@ -305,7 +305,7 @@ WHERE `r`.`ride_id` =  " . $_POST['ride_id'] . "");
                     }
                     $admin = $this->db->get("admin")->row();
                     $this->common->android_push($token, $load, $admin->api_key);
-                   
+
                     echo json_encode(array("status" => "success", "data" => "Your ride has been cancelled"));
                 } elseif ($_POST['status'] == 'COMPLETED') {
                     $qry = $this->db->query("SELECT `gcm_token` FROM (`users` u) JOIN `rides` r ON `r`.`user_id` = `u`.`user_id` OR `r`.`driver_id` = `u`.`user_id`
@@ -327,8 +327,7 @@ WHERE `r`.`ride_id` =  " . $_POST['ride_id'] . "");
                 }
             }else{
 				if(!empty($_POST['payment_mode'])){
-				    
-				    
+
 					$this->db->select("gcm_token");
                     $this->db->from("users u");
                     $this->db->join("rides r", "r.driver_id = u.user_id");
@@ -337,15 +336,15 @@ WHERE `r`.`ride_id` =  " . $_POST['ride_id'] . "");
                     $res = $qry->row();
 
                     $load = array();
-                    
+
                     if ($_POST['payment_mode'] != 'PAYPAL') {
                         $load['msg'] = 'User requested offline payment';
                     } else {
                         $load['msg'] = 'User just paid for your ride';
                     }
-                    
+
                     $load['title'] = 'Taxiapp';
-                    
+
                     $load['action'] = 'ACCEPTED';
                     $token[] = $res->gcm_token;
 

@@ -41,7 +41,7 @@ class Users extends CI_Model {
         return $query->result();
     }
 
-    function chk_dup_fb($post, $par = NULL) {
+    function chk_dup_fb($post, $par = NULL) { 
         $uname = $post->id;
         if ($par == "data") {
             $this->db->select('*');
