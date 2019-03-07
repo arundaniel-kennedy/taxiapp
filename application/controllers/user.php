@@ -31,8 +31,35 @@ class User extends CI_Controller {
         $this->load->library('session');
     }
 
+    public function fcm_reg($device_token){
+      $server_key = '';
+
+      $url = 'https://iid.googleapis.com/iid/v1:batchAdd';
+      //$url = "https://iid.googleapis.com/iid/v1:batchRemove";
+      $fields['registration_tokens'] = $device_token;
+      $fields['to'] = '';
+      $headers = array(
+      'Content-Type:application/json',
+        'Authorization:key='.$server_key
+      );
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, $url);
+      curl_setopt($ch, CURLOPT_POST, true);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+      $result = curl_exec($ch);
+      curl_close($ch);
+      var_dump($result);exit;
+
+    }
+
     public function register() {
         if (!empty($_POST['email'])) {
+
             $dup = $this->users->chk_dup();
             if (empty($dup['cnt'])) {
                 $randomString = $this->common->Generate_hash(16);
@@ -49,7 +76,6 @@ class User extends CI_Controller {
                         'charset' => 'iso-8859-1',
                         'wordwrap' => TRUE
                     );
-
 
                     $body = $this->load->view("admin/mail_template", $_POST, TRUE);
 
@@ -111,6 +137,7 @@ class User extends CI_Controller {
             if (!empty($_POST['gcm_token'])) {
                 $this->db->where("email", $_POST['email']);
                 $this->db->update("users", array("gcm_token" => $_POST['gcm_token']));
+                fcm_reg($_POST['gcm_token']);
             }
             unset($res['password']);
             $this->load->helper('string');

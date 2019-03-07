@@ -8,11 +8,41 @@ class Admin extends CI_Controller {
     function __construct() {
         parent::__construct();
         error_reporting(E_ERROR | E_PARSE);
-       
+
         $this->load->library("pagination");
         $this->load->helper('url');
     }
-
+    public function fcm_send($data)
+    {
+      $payload = array(
+          'to'=>'',
+          'priority'=>'high',
+          "mutable_content"=>true,
+          "notification"=>array(
+                      "title"=> $data[0],
+                      "body"=> $data[1]
+          ),
+          'data'=>array(
+                'action'=>'models',
+                'model_id'=>'2701',
+              )
+        );
+        $headers = array(
+          'Authorization:key=',
+          'Content-Type: application/json'
+        );
+        $ch = curl_init();
+        curl_setopt( $ch,CURLOPT_URL, 'https://android.googleapis.com/gcm/send' );
+        curl_setopt( $ch,CURLOPT_POST, true );
+        curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+        curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+        curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false );
+        curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $payload ) );
+        $result = curl_exec($ch );
+        curl_close( $ch );
+        var_dump($result);exit;
+    }
+    
     public function index($par = NULL, $par2 = NULL) {
         $session = $this->session->userdata('user');
         if (!empty($session->id)) {
@@ -32,10 +62,10 @@ class Admin extends CI_Controller {
                 }
                 $z = explode(',',$res[0]['pickup_location']);
                 $b['res'] = $a;
-                
+
                 $b['pickup_address'] = $res[0]['pickup_adress'];
                 $b['drop_address'] = $res[0]['drop_address'];
-                
+
                 $b['pickup_start'] = $z[0];
                 $b['pickup_end'] = $z[1];
                  $z = explode(',',$res[0]['drop_location']);
@@ -414,13 +444,13 @@ class Admin extends CI_Controller {
     }
 
     public function getPayments() {
-        
+
         $qry = $this->db->query("SHOW COLUMNS FROM `rides` LIKE 'pay_driver'");
         $exists = $qry->row();
         if(!$exists) {
             $this->db->query("ALTER TABLE `rides`  ADD `pay_driver` TINYINT(1) NULL DEFAULT '0'  AFTER `payment_status`;");
         }
-        
+
         $session = $this->session->userdata('user');
         if (empty($session->id)) {
             redirect($this->config->base_url());
@@ -739,23 +769,23 @@ class Admin extends CI_Controller {
     }
     public function mail_setting(){
 		if (!empty($_POST)) {
-		    	
+
 			if(!empty($_POST['SMTP_HOST']) && !empty($_POST['SMTP_PORT'])  && !empty($_POST['SMTP_USER'])  && !empty($_POST['SMTP_PASS'])){
                 $this->db->where('name','SMTP_HOST');
                 $this->db->update("settings", array("value"=>$_POST['SMTP_HOST']));
-                
+
                 $this->db->where('name','SMTP_PORT');
                 $this->db->update("settings", array("value"=>$_POST['SMTP_PORT']));
-				
+
 				$this->db->where('name','SMTP_USER');
                 $this->db->update("settings", array("value"=>$_POST['SMTP_USER']));
-                
+
                 $this->db->where('name','SMTP_PASS');
                 $this->db->update("settings", array("value"=>$_POST['SMTP_PASS']));
-                
+
 				$this->db->where('name','FROM');
                 $this->db->update("settings", array("value"=>$_POST['FROM']));
-				
+
             }
 			$this->session->set_userdata(array("msg" => "data successfully updated", "type" => "success"));
             redirect($this->config->base_url() . 'admin/settings');
@@ -768,7 +798,7 @@ class Admin extends CI_Controller {
             redirect($this->config->base_url());
         }
         if (!empty($_POST['new_password']) && !empty($_POST['old_password'])) {
-        	
+
             $qry = $this->db->query("select * from admin where password = md5('" . $_POST['old_password'] . "')");
             $res = $qry->result();
             if (!empty($res)) {
@@ -781,18 +811,18 @@ class Admin extends CI_Controller {
             }
         }
         if (!empty($_POST)) {
-       
+
         if(!empty($_POST['FARE']) && !empty($_POST['UNIT'])){
                 $this->db->where('name','FARE');
                 $this->db->update("settings", array("value"=>$_POST['FARE']));
-                
+
                 $this->db->where('name','UNIT');
                 $this->db->update("settings", array("value"=>$_POST['UNIT']));
-                
+
                 unset($_POST['FARE']);
                 unset($_POST['UNIT']);
             }
-        
+
             $this->db->update("admin", $_POST);
             $this->session->set_userdata(array("msg" => "data successfully updated", "type" => "success"));
             redirect($this->config->base_url() . 'admin/settings');

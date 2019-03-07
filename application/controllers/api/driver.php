@@ -11,10 +11,10 @@ class Driver extends REST_Controller {
      *
      * Maps to the following URL
      * 		http://example.com/index.php/welcome
-     * 	- or -  
+     * 	- or -
      * 		http://example.com/index.php/welcome/index
      * 	- or -
-     * Since this controller is set as the default controller in 
+     * Since this controller is set as the default controller in
      * config/routes.php, it's displayed at http://example.com/
      *
      * So any other public methods not prefixed with an underscore will
@@ -25,10 +25,40 @@ class Driver extends REST_Controller {
         // Call the Model constructor
         parent::__construct();
         error_reporting(E_ERROR | E_PARSE);
-        
+
         $this->load->library('session');
     }
-
+    public function fcm_send($data)
+    {
+      $payload = array(
+          'to'=>'',
+          'priority'=>'high',
+          "mutable_content"=>true,
+          "notification"=>array(
+                      "title"=> $data[0],
+                      "body"=> $data[1]
+          ),
+          'data'=>array(
+                'action'=>'models',
+                'model_id'=>'2701',
+              )
+        );
+        $headers = array(
+          'Authorization:key=',
+          'Content-Type: application/json'
+        );
+        $ch = curl_init();
+        curl_setopt( $ch,CURLOPT_URL, 'https://android.googleapis.com/gcm/send' );
+        curl_setopt( $ch,CURLOPT_POST, true );
+        curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+        curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+        curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false );
+        curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $payload ) );
+        $result = curl_exec($ch );
+        curl_close( $ch );
+        var_dump($result);exit;
+    }
+    
    public function accept_req_post() {
         if (!empty($_POST['X-API-KEY'])) {
             unset($_POST['X-API-KEY']);
@@ -74,10 +104,10 @@ class Driver extends REST_Controller {
             $res->unit = $unit->value;
             $this->response(array("status" => "success", "data" => $res));
             //if ($this->db->affected_rows() > 0) {
-               
-			/*	
+
+			/*
                 $this->response(array("status" => "success", "data" => $res));
-               
+
            /* } else {
                 $this->response(array("status" => "fail", "data" => "data not available"));
             } */
